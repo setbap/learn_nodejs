@@ -1,1 +1,8 @@
-{"product":[{"id":"2341123234c23","itemPrice":"19","qty":2}],"totalPrice":38}
+{
+    "product": [{
+        "id": "2341123234c23",
+        "itemPrice": "19",
+        "qty": 2
+    }],
+    "totalPrice": 38
+}
