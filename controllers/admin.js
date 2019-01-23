@@ -13,16 +13,28 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  Product.create({
-    description,
-    imageUrl,
-    title,
-    price
-  }).then(
-    () => console.log("product created")
-  ).catch(
-    err => console.log(err)
-  )
+  const userId = req.user.id;
+  req.user.createProduct({
+      description,
+      imageUrl,
+      title,
+      price,
+    })
+    // Product.create({
+    //     description,
+    //     imageUrl,
+    //     title,
+    //     price,
+    //     userId,
+    //   })
+    .then(
+      () => {
+        console.log("product created")
+        res.redirect('/')
+      }
+    ).catch(
+      err => console.log("postAddProduct")
+    )
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -31,14 +43,28 @@ exports.postEditProduct = (req, res, next) => {
   const upPrice = req.body.price;
   const upImg = req.body.imageUrl;
   const upDesc = req.body.description;
-  const upProd = new Product(prodId, upTitle, upImg, upDesc, upPrice);
-  upProd.save();
+  const userId = req.user.id;
+
+  Product.findByPk(prodId)
+    .then(prod => {
+      prod.title = upTitle;
+      prod.price = upPrice;
+      prod.imageUrl = upImg;
+      prod.description = upDesc;
+      prod.userId = userId;
+      prod.save();
+    })
+    .catch(
+      err => console.log("err in post edit")
+
+    )
   res.redirect('/admin/products');
 }
 
 exports.postDelProduct = (req, res, next) => {
   const prodId = req.body.prodId;
-  Product.del(prodId, () => {
+  Product.findByPk(prodId).then(prod => {
+    prod.destroy();
     res.redirect('/admin/products');
   })
 
@@ -50,7 +76,12 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect("/");
   }
   const prodId = req.params.prodId;
-  Product.findById(prodId, product => {
+  req.user.getProducts({
+    where: {
+      id: prodId
+    }
+  }).then(products => {
+    const product = products[0];
     if (!product) {
       return res.redirect("/")
     }
@@ -60,11 +91,13 @@ exports.getEditProduct = (req, res, next) => {
       editing: true,
       product: product
     })
-  });
+  }).catch(
+    () => console.log("err on edit prod")
+  )
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll(products => {
+  req.user.getProducts().then(products => {
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
