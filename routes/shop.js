@@ -1,5 +1,3 @@
-const path = require('path');
-
 const express = require('express');
 
 const shopController = require('../controllers/shop');
@@ -20,8 +18,9 @@ router.post('/cart-delete-item', shopController.postCartDeleteProduct);
 
 router.post('/cart-delete-item-all', shopController.postCartDeleteProductAll);
 
+router.post('/create-order', shopController.postCreateOrder)
+
 router.get('/orders', shopController.getOrders);
 
-router.get('/checkout', shopController.getCheckout);
 
 module.exports = router;

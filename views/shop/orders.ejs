@@ -1,9 +1,47 @@
 <%- include('../includes/head.ejs') %>
-    </head>
+<style>
+    .inline {
+        display: inline;
+    }
+</style>
+</head>
 
-    <body>
-        <%- include('../includes/navigation.ejs') %>
-        <main>
-            <h1>Nothing there!</h1>
-        </main>
-        <%- include('../includes/end.ejs') %>
+<body>
+    <%- include('../includes/navigation.ejs') %>
+    <main>
+        <% if (orders.length > 0) { %>
+        <ul class="cart__item-list">
+
+            <% orders.forEach(order => { %>
+            <li class="cart__item">
+                <h1>
+                    <%= order.id %>
+                </h1>
+                <% console.log("-1------------------------------") %>
+                <ul class="cart__item-list">
+
+                    <% order.products.forEach(p => { %>
+
+                    <li class="cart__item">
+                        <h4 class="inline">
+                            item title:
+                            <%= p.title %>
+                        </h4>
+                        <h5 class="inline">
+                            (
+                            <%= p.orderItem.quantity  %>
+                            )
+                        </h5>
+                    </li>
+
+                    <% }) %>
+                </ul>
+            </li>
+            <% }) %>
+        </ul>
+
+        <% } else { %>
+        <h1>No Products in Cart!</h1>
+        <% } %>
+    </main>
+    <%- include('../includes/end.ejs') %>
