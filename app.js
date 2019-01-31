@@ -1,98 +1,52 @@
-const path = require('path');
+const path = require("path");
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const sequelize = require("./util/database");
-const errorController = require('./controllers/error');
-
-const User = require('./models/user');
-const Product = require('./models/product');
-const Cart = require('./models/cart');
-const CartItem = require('./models/cart-item');
-const Order = require('./models/order');
-const OrderItem = require('./models/order-item');
+const express = require("express");
+const bodyParser = require("body-parser");
+const errorController = require("./controllers/error");
+const mongoose = require("mongoose");
+const User = require("./models/user");
 
 const app = express();
 
-app.set('view engine', 'ejs');
-app.set('views', 'views');
-
+app.set("view engine", "ejs");
+app.set("views", "views");
 
 app.use((req, res, next) => {
-    User.findByPk(1)
-        .then(
-            (user) => {
-                req.user = user;
-                next();
-            }
-        ).catch(
-            () => console.log("err in use in user")
-        )
+  User.findById("5c51f6a9e34dcb44f84a529d")
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(() => console.log("err in use in user"));
 });
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
 
-app.use(bodyParser.urlencoded({
+app.use(
+  bodyParser.urlencoded({
     extended: false
-}));
-app.use(express.static(path.join(__dirname, 'public')));
+  })
+);
+app.use(express.static(path.join(__dirname, "public")));
 
-
-
-app.use('/admin', adminRoutes);
+app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-Product.belongsTo(User, {
-    constraints: true,
-    onDelete: 'CASCADE'
-});
-User.hasMany(Product);
-User.hasOne(Cart);
-Cart.belongsTo(User);
-Cart.belongsToMany(Product , {through:CartItem});
-Product.belongsToMany(Cart , {through:CartItem});
-Order.belongsTo(User);
-User.hasMany(Order);
-Product.belongsToMany(Order , {through:OrderItem});
-Order.belongsToMany(Product , {through:OrderItem});
-
-
-
-sequelize
-    // .sync({force:true})
-    .sync()
-    .then(
-        res => {
-            return User.findByPk(1)
-        }
-    )
-    .then(
-        usr => {
-            if (!usr) {
-                return User.create({
-                    name: "sina",
-                    email: "ebr.sina@gamil.com"
-                });
-            }
-            return usr;
-        }
-    )
-    // .then(
-    //     usr => {
-    //         // console.log(usr);
-    //         return usr.createCart();
-    //     }
-    // )
-    .then(
-        usr => {
-            // console.log(usr);
-            app.listen(4000);
-        }
-    )
-    .catch(
-        err => console.log(err)
-
-    );
+mongoose
+  .connect("mongodb://sina:sina1234@ds024548.mlab.com:24548/node_db")
+  .then(() => {
+    // const user = new User({
+    //   name: "sina",
+    //   email: "ebr.sina@gmail.com",
+    //   cart: {
+    //     items: []
+    //   }
+    // });
+    // user.save();
+    console.log("conected");
+    app.listen(5000);
+  })
+  .catch(err => console.log(err));

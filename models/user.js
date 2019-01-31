@@ -1,21 +1,66 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../util/database');
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const User = sequelize.define('user', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-    allowNull: false,
-  },
+const UserSchema = new Schema({
   name: {
-    allowNull: false,
-    type: Sequelize.STRING
+    type: String,
+    required: true
   },
   email: {
-    allowNull: false,
-    type: Sequelize.STRING
+    type: String,
+    required: true
   },
+  cart: {
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: "Product"
+        },
+        quantity: {
+          type: Schema.Types.Number,
+          required: true
+        }
+      }
+    ]
+  }
 });
 
-module.exports = User;
+UserSchema.methods.addToCart = function(product) {
+  const cartProductIndex = this.cart.items.findIndex(cp => {
+    return cp.productId.toString() === product._id.toString();
+  });
+  let newQuantity = 1;
+  const updatedCartItems = [...this.cart.items];
+
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity
+    });
+  }
+  const updatedCart = {
+    items: updatedCartItems
+  };
+  this.cart = updatedCart;
+  return this.save();
+};
+
+UserSchema.methods.deleteFromCart = function(productId) {
+  const newCart = this.cart.items.filter(
+    item => item.productId.toString() !== productId.toString()
+  );
+  this.cart.items = newCart;
+  return this.save();
+};
+
+UserSchema.methods.clearCart = function() {
+  this.cart.items = [];
+  return this.save();
+};
+
+module.exports = mongoose.model("User", UserSchema);

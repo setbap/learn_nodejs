@@ -23,7 +23,9 @@
             </div>
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<% if (editing) { %><%= product.price %> <% } %>">
+                <input type="number" name="price" id="price" step="0.01" value=<% if (editing) { %>
+                <%= product.price %>
+                <% } %>>
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
@@ -31,7 +33,7 @@
             </div>
 
             <% if (editing) { %>
-                <input type="hidden" value="<%= product.id %>" name="prodId">
+            <input type="hidden" value="<%= product._id %>" name="prodId">
             <% } %>
 
             <button class="btn" type="submit">

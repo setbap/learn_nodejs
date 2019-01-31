@@ -20,16 +20,16 @@
                 <% console.log("-1------------------------------") %>
                 <ul class="cart__item-list">
 
-                    <% order.products.forEach(p => { %>
+                    <% order.items.forEach(p => { %>
 
                     <li class="cart__item">
                         <h4 class="inline">
                             item title:
-                            <%= p.title %>
+                            <%= p.product.title %>
                         </h4>
                         <h5 class="inline">
                             (
-                            <%= p.orderItem.quantity  %>
+                            <%= p.quantity  %>
                             )
                         </h5>
                     </li>
