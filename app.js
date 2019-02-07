@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const errorController = require("./controllers/error");
 const mongoose = require("mongoose");
 const User = require("./models/user");
+const authRoutes = require('./routes/auth')
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
-
+app.use(authRoutes)
 app.use(errorController.get404);
 
 mongoose
