@@ -19,10 +19,6 @@
                                         <input type="hidden" value="<%= p.productId._id %>" name="productId">
                                         <button class="btn danger" type="submit">Delete</button>
                                 </form>
-                                <form action="/cart-delete-item-all" method="POST">
-                                        <input type="hidden" value="<%= p.productId._id %>" name="productId">
-                                        <button class="btn danger" type="submit">Delete All</button>
-                                </form>
                         </li>
                         <% }) %>
                 </ul>
