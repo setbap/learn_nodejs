@@ -1,30 +1,45 @@
 const path = require("path");
+const dbPath = require("./util/db-path").db;
+const secret = require("./util/db-path").sessionSecret;
 
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const mongoose = require("mongoose");
-
+const mongoSession = require("connect-mongodb-session")(session);
 const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const errorController = require("./controllers/error");
 
 const app = express();
+const store = new mongoSession({
+	uri: dbPath,
+	collection: "sessions",
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+app.use(
+	session({
+		secret,
+		resave: false,
+		saveUninitialized: false,
+		store,
+	}),
+);
+
 app.use((req, res, next) => {
-	User.findById("5c51f6a9e34dcb44f84a529d")
+	if (!req.session.user) {
+		return next();
+	}
+	User.findById(req.session.user._id)
 		.then((user) => {
 			req.user = user;
 			next();
 		})
-		.catch(() => console.log("err in use in user"));
+		.catch((err) => console.log(err));
 });
-app.use(
-	session({ secret: "hello baby", resave: false, saveUninitialized: false }),
-);
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -42,7 +57,7 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-	.connect("mongodb://sina:sina1234@ds024548.mlab.com:24548/node_db")
+	.connect(dbPath)
 	.then(() => {
 		// const user = new User({
 		//   name: "sina",
