@@ -2,10 +2,12 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const errorController = require("./controllers/error");
+const session = require("express-session");
 const mongoose = require("mongoose");
+
 const User = require("./models/user");
-const authRoutes = require('./routes/auth')
+const authRoutes = require("./routes/auth");
+const errorController = require("./controllers/error");
 
 const app = express();
 
@@ -13,41 +15,44 @@ app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use((req, res, next) => {
-  User.findById("5c51f6a9e34dcb44f84a529d")
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(() => console.log("err in use in user"));
+	User.findById("5c51f6a9e34dcb44f84a529d")
+		.then((user) => {
+			req.user = user;
+			next();
+		})
+		.catch(() => console.log("err in use in user"));
 });
+app.use(
+	session({ secret: "hello baby", resave: false, saveUninitialized: false }),
+);
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
 app.use(
-  bodyParser.urlencoded({
-    extended: false
-  })
+	bodyParser.urlencoded({
+		extended: false,
+	}),
 );
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
-app.use(authRoutes)
+app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect("mongodb://sina:sina1234@ds024548.mlab.com:24548/node_db")
-  .then(() => {
-    // const user = new User({
-    //   name: "sina",
-    //   email: "ebr.sina@gmail.com",
-    //   cart: {
-    //     items: []
-    //   }
-    // });
-    // user.save();
-    console.log("conected");
-    app.listen(5000);
-  })
-  .catch(err => console.log(err));
+	.connect("mongodb://sina:sina1234@ds024548.mlab.com:24548/node_db")
+	.then(() => {
+		// const user = new User({
+		//   name: "sina",
+		//   email: "ebr.sina@gmail.com",
+		//   cart: {
+		//     items: []
+		//   }
+		// });
+		// user.save();
+		console.log("conected");
+		app.listen(5000);
+	})
+	.catch((err) => console.log(err));
