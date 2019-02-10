@@ -10,6 +10,7 @@ const mongoSession = require("connect-mongodb-session")(session);
 const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const errorController = require("./controllers/error");
+const csurf = require("csurf");
 
 const app = express();
 const store = new mongoSession({
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 		})
 		.catch((err) => console.log(err));
 });
+const csrf = csurf();
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -49,7 +51,16 @@ app.use(
 		extended: false,
 	}),
 );
+
+app.use(csrf);
+
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use((req, res, next) => {
+	res.locals.isAuthenticated = req.session.isLoggedIn;
+	res.locals.csrfToken = req.csrfToken();
+	next();
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -59,14 +70,6 @@ app.use(errorController.get404);
 mongoose
 	.connect(dbPath)
 	.then(() => {
-		// const user = new User({
-		//   name: "sina",
-		//   email: "ebr.sina@gmail.com",
-		//   cart: {
-		//     items: []
-		//   }
-		// });
-		// user.save();
 		console.log("conected");
 		app.listen(5000);
 	})

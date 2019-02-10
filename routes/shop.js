@@ -1,4 +1,5 @@
 const express = require("express");
+const authed = require("../middleware/Authed");
 
 const shopController = require("../controllers/shop");
 
@@ -10,16 +11,14 @@ router.get("/products", shopController.getProducts);
 
 router.get("/products/:id", shopController.getProduct);
 
-router.get("/cart", shopController.getCart);
+router.get("/cart", authed, shopController.getCart);
 
-router.post("/cart", shopController.postCart);
+router.post("/cart", authed, shopController.postCart);
 
-router.post("/cart-delete-item", shopController.postCartDeleteProduct);
+router.post("/cart-delete-item", authed, shopController.postCartDeleteProduct);
 
-// router.post('/cart-delete-item-all', shopController.postCartDeleteProductAll);
+router.post("/create-order", authed, shopController.postCreateOrder);
 
-router.post("/create-order", shopController.postCreateOrder);
-
-router.get("/orders", shopController.getOrders);
+router.get("/orders", authed, shopController.getOrders);
 
 module.exports = router;

@@ -81,7 +81,7 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-	Product.find().then((products) => {
+	Product.find({ userId: req.session.user._id }).then((products) => {
 		res.render("admin/products", {
 			prods: products,
 			pageTitle: "Admin Products",
