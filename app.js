@@ -1,7 +1,7 @@
 const path = require("path");
 const dbPath = require("./util/db-path").db;
 const secret = require("./util/db-path").sessionSecret;
-
+const flash = require("connect-flash");
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -20,7 +20,7 @@ const store = new mongoSession({
 
 app.set("view engine", "ejs");
 app.set("views", "views");
-
+app.use(flash());
 app.use(
 	session({
 		secret,
