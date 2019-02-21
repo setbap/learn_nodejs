@@ -6,6 +6,14 @@ const userSchema = new Schema({
 		type: String,
 		required: true,
 	},
+	resetCode: {
+		type: String,
+		required: false,
+	},
+	resetTime: {
+		type: Date,
+		required: false,
+	},
 	password: {
 		type: String,
 		required: true,

@@ -11,6 +11,15 @@ const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const errorController = require("./controllers/error");
 const csurf = require("csurf");
+const multer = require("multer");
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "images");
+	},
+	filename: (req, file, cb) => {
+		cb(null, "sasd" + "-" + file.originalname);
+	},
+});
 
 const app = express();
 const store = new mongoSession({
@@ -45,16 +54,17 @@ const csrf = csurf();
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-
 app.use(
 	bodyParser.urlencoded({
 		extended: false,
 	}),
 );
+app.use(multer({ storage: storage }).single("image"));
 
 app.use(csrf);
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = req.session.isLoggedIn;

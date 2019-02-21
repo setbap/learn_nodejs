@@ -1,3 +1,6 @@
 node_modules
-
+images
 util/db-path.js
+util/mail.js
+
+todo.md
