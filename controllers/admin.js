@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const deleter = require("../util/delete_file");
 
 exports.getAddProduct = (req, res, next) => {
 	res.render("admin/edit-product", {
@@ -41,7 +42,7 @@ exports.postEditProduct = (req, res, next) => {
 	const prodId = req.body.prodId;
 	const upTitle = req.body.title;
 	const upPrice = req.body.price;
-	const upImg = req.body.imageUrl;
+	const upImg = req.file;
 	const upDesc = req.body.description;
 	// const userId = req.user.id;
 
@@ -50,7 +51,10 @@ exports.postEditProduct = (req, res, next) => {
 		.then((prod) => {
 			prod.title = upTitle;
 			prod.price = upPrice;
-			prod.imageUrl = upImg;
+			if (upImg) {
+				deleter.deleteFile(prod.imageUrl);
+				prod.imageUrl = upImg.path;
+			}
 			prod.description = upDesc;
 			return prod.save();
 		})
@@ -60,8 +64,11 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDelProduct = (req, res, next) => {
 	const prodId = req.body.prodId;
-	Product.findByIdAndDelete(prodId).then((resualt) => {
-		res.redirect("/admin/products");
+	Product.findById(prodId).then((prod) => {
+		if (prod) deleter.deleteFile(prod.imageUrl);
+		Product.findByIdAndDelete(prodId).then((resualt) => {
+			res.redirect("/admin/products");
+		});
 	});
 };
 

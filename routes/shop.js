@@ -21,4 +21,8 @@ router.post("/create-order", authed, shopController.postCreateOrder);
 
 router.get("/orders", authed, shopController.getOrders);
 
+router.get("/orders/factore/:factoreId", authed, shopController.getFactore);
+
+// router.get("/createFake", shopController.fakeIt);
+
 module.exports = router;

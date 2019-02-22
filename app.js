@@ -20,7 +20,17 @@ const storage = multer.diskStorage({
 		cb(null, "sasd" + "-" + file.originalname);
 	},
 });
-
+const fileFilter = (req, file, cb) => {
+	if (
+		file.mimetype === "image/png" ||
+		file.mimetype === "image/jpg" ||
+		file.mimetype === "image/jpeg"
+	) {
+		cb(null, true);
+	} else {
+		cb(null, false);
+	}
+};
 const app = express();
 const store = new mongoSession({
 	uri: dbPath,
@@ -59,7 +69,7 @@ app.use(
 		extended: false,
 	}),
 );
-app.use(multer({ storage: storage }).single("image"));
+app.use(multer({ storage: storage, fileFilter }).single("image"));
 
 app.use(csrf);
 
@@ -78,7 +88,7 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-	.connect(dbPath)
+	.connect(dbPath, { useNewUrlParser: true })
 	.then(() => {
 		console.log("conected");
 		app.listen(5000);

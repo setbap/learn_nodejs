@@ -1,19 +1,42 @@
 const Product = require("../models/product");
 const Order = require("../models/order");
-
+const PDFDocument = require("pdfkit");
+const path = require("path");
+const fs = require("fs");
+// var faker = require("faker");
 exports.getProducts = (req, res, next) => {
-	console.log(req.user);
+	// console.log(req.user);
 
-	Product.find()
+	// Product.find()
+	// 	.then((products) => {
+	// 		res.render("shop/product-list", {
+	// 			prods: products,
+	// 			pageTitle: "All Products",
+	// 			path: "/products",
+	// 			isAuthenticated: req.session.isLoggedIn,
+	// 		});
+	// 	})
+	// 	.catch(() => console.log("err in get"));
+	var perPage = 6;
+	var page = req.query.page || 1;
+
+	Product.find({})
+		.skip(perPage * page - perPage)
+		.limit(perPage)
 		.then((products) => {
-			res.render("shop/product-list", {
-				prods: products,
-				pageTitle: "All Products",
-				path: "/products",
-				isAuthenticated: req.session.isLoggedIn,
+			Product.countDocuments().exec(function(err, count) {
+				if (err) return next(err);
+				res.render("shop/product-list", {
+					prods: products,
+					pageTitle: "All Products",
+					path: "/products",
+					isAuthenticated: req.session.isLoggedIn,
+					products: products,
+					current: page,
+					pages: Math.ceil(count / perPage),
+				});
 			});
-		})
-		.catch(() => console.log("err in get"));
+		});
 };
 
 exports.getIndex = (req, res, next) => {
@@ -117,3 +140,70 @@ exports.getOrders = (req, res, next) => {
 		});
 	});
 };
+
+exports.getFactore = (req, res, next) => {
+	const factoreId = req.params.factoreId;
+	Order.findById(factoreId)
+		.then((order) => {
+			if (order.user.userId.toString() === req.user._id.toString()) {
+				const fileInfo = "invoice-" + factoreId + ".pdf";
+				const filePath = path.join("factores", fileInfo);
+				const pdfDoc = new PDFDocument();
+				res.setHeader("Content-Type", "application/pdf");
+				res.setHeader(
+					"Content-Disposition",
+					'inline; filename="' + fileInfo + '"',
+				);
+				pdfDoc.pipe(fs.createWriteStream(filePath));
+				pdfDoc.pipe(res);
+				let totalPrice = 0;
+				order.items.forEach((prod) => {
+					totalPrice += prod.quantity * prod.product.price;
+					pdfDoc
+						.fontSize(14)
+						.text(
+							prod.product.title +
+								" - " +
+								prod.quantity +
+								" x " +
+								"$" +
+								prod.product.price,
+						);
+				});
+				pdfDoc.text("---");
+				pdfDoc.fontSize(20).text("Total Price: $" + totalPrice);
+				pdfDoc.end();
+			} else {
+				res.redirect("/orders");
+			}
+		})
+		.catch((err) => {
+			console.log(err);
+			res.redirect("/orders");
+		});
+};
+
+// exports.fakeIt = (req, res, next) => {
+// 	for (var i = 0; i < 90; i++) {
+// 		var product = new Product();
+
+// 		product.description = faker.commerce.department();
+// 		product.price = faker.commerce.price();
+// 		product.title = faker.commerce.productName();
+// 		product.imageUrl = faker.image.image();
+// 		product.userId = req.user._id;
+
+// 		product.save(function(err) {
+// 			if (err) throw err;
+// 		});
+// 	}
+// 	res.redirect("/add-product");
+// };
+
+// const product = new Product({
+// 	description,
+// 	price,
+// 	title,
+// 	imageUrl,
+// 	userId: req.user,
+// });
