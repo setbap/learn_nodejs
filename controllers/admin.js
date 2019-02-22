@@ -62,14 +62,24 @@ exports.postEditProduct = (req, res, next) => {
 		.catch((err) => console.log("err in post edit"));
 };
 
-exports.postDelProduct = (req, res, next) => {
-	const prodId = req.body.prodId;
-	Product.findById(prodId).then((prod) => {
-		if (prod) deleter.deleteFile(prod.imageUrl);
-		Product.findByIdAndDelete(prodId).then((resualt) => {
-			res.redirect("/admin/products");
+exports.deleteProduct = (req, res, next) => {
+	const pid = req.params.pid;
+	console.log("donw");
+
+	Product.findById(pid)
+		.then((prod) => {
+			if (prod) {
+				deleter.deleteFile(prod.imageUrl);
+				return Product.findByIdAndDelete(pid).then((resualt) => {
+					res.status(200).json({ message: "Success!", status: 200 });
+				});
+			} else {
+				return res.status(500).json({ message: "Success!" });
+			}
+		})
+		.catch(() => {
+			res.status(500).json({ message: "Success!" });
 		});
-	});
 };
 
 exports.getEditProduct = (req, res, next) => {
