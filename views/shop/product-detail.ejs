@@ -21,4 +21,34 @@
             <%- include('../includes/add-to-cart') %>
         <% } %>
     </main>
+    <% if (isAuthenticated) { %>
+        <div class="centered" >
+        <form method="POST" action="/products/comment" >
+            
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <input type="hidden" name="prodId" value="<%= product._id %>">
+            <textarea name="comment" id="commnt" cols="30" rows="10"></textarea>
+            <button type="submit">SEND !</button>
+        </form>
+    </div>
+    <% } %>
+
+        
+        <div class="centered border margini" >
+            <% if (product.comments.length > 0 ) { %>
+                <h2>Comments </h2>
+                <% for (let item of product.comments) { %>
+                    <div class="border margini">
+                        <h4><%= item.userId.email %></h4>
+                        <h5><%= item.content %></h4>
+                    </div>
+
+                <% } %>
+            <% } %>
+          
+        </div>
+        <br>
+        <br>
+   
+    
     <%- include('../includes/end.ejs') %>

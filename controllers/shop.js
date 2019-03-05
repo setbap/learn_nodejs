@@ -41,36 +41,44 @@ exports.getProducts = (req, res, next) => {
 
 exports.getIndex = (req, res, next) => {
 	Product.find()
-		.then((products) => {
-			res.render("shop/index", {
+		.sort({ title: 1 })
+		.exec((err, products) => {
+			if (err) {
+				return console.log("err in get");
+			}
+
+			return res.render("shop/index", {
 				prods: products,
 				pageTitle: "Shop",
 				path: "/",
 				isAuthenticated: req.session.isLoggedIn,
 			});
-		})
-		.catch(() => console.log("err in get"));
+		});
 };
 
-exports.getProduct = (req, res, next) => {
+exports.getProduct = async (req, res, next) => {
 	const productId = req.params.id;
-	Product.findById(productId)
-		.then((product) => {
-			res.render("shop/product-detail", {
-				product: product,
-				pageTitle: "yah",
-				path: "/products",
-				isAuthenticated: req.session.isLoggedIn,
-			});
-		})
-		.catch((err) => console.log("getProduct"));
+	try {
+		const prod = await Product.findById(productId).exec();
+		const product = await prod
+			.populate("comments.userId", "email")
+			.execPopulate();
+
+		res.render("shop/product-detail", {
+			product: product,
+			pageTitle: "yah",
+			path: "/products",
+			isAuthenticated: req.session.isLoggedIn,
+		});
+	} catch (error) {
+		console.log("getProduct");
+	}
 };
 
 exports.getCart = (req, res, next) => {
 	req.user
 		.populate("cart.items.productId")
 		.execPopulate()
-
 		.then((user) => {
 			// console.log();
 			res.render("shop/cart", {
@@ -183,6 +191,18 @@ exports.getFactore = (req, res, next) => {
 		});
 };
 
+exports.postComment = async (req, res, next) => {
+	const prodId = req.body.prodId;
+	const comment = req.body.comment;
+	try {
+		const prod = await Product.findById(prodId);
+		await prod.addComment(comment, req.user._id);
+		return res.redirect(`/products/${prodId}`);
+	} catch (err) {
+		console.log(err);
+	}
+};
+
 // exports.fakeIt = (req, res, next) => {
 // 	for (var i = 0; i < 90; i++) {
 // 		var product = new Product();
@@ -199,11 +219,3 @@ exports.getFactore = (req, res, next) => {
 // 	}
 // 	res.redirect("/add-product");
 // };
-
-// const product = new Product({
-// 	description,
-// 	price,
-// 	title,
-// 	imageUrl,
-// 	userId: req.user,
-// });

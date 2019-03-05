@@ -1,39 +1,42 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-	email: {
-		type: String,
-		required: true,
-	},
-	resetCode: {
-		type: String,
-		required: false,
-	},
-	resetTime: {
-		type: Date,
-		required: false,
-	},
-	password: {
-		type: String,
-		required: true,
-	},
-	cart: {
-		items: [
-			{
-				productId: {
-					type: Schema.Types.ObjectId,
-					required: true,
-					ref: "Product",
+const userSchema = new Schema(
+	{
+		email: {
+			type: String,
+			required: true,
+		},
+		resetCode: {
+			type: String,
+			required: false,
+		},
+		resetTime: {
+			type: Date,
+			required: false,
+		},
+		password: {
+			type: String,
+			required: true,
+		},
+		cart: {
+			items: [
+				{
+					productId: {
+						type: Schema.Types.ObjectId,
+						required: true,
+						ref: "Product",
+					},
+					quantity: {
+						type: Schema.Types.Number,
+						required: true,
+					},
 				},
-				quantity: {
-					type: Schema.Types.Number,
-					required: true,
-				},
-			},
-		],
+			],
+		},
 	},
-});
+	{ timestamps: true },
+);
 
 userSchema.methods.addToCart = function(product) {
 	const cartProductIndex = this.cart.items.findIndex((cp) => {

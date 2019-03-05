@@ -23,6 +23,8 @@ router.get("/orders", authed, shopController.getOrders);
 
 router.get("/orders/factore/:factoreId", authed, shopController.getFactore);
 
+router.post("/products/comment", shopController.postComment);
+
 // router.get("/createFake", shopController.fakeIt);
 
 module.exports = router;
